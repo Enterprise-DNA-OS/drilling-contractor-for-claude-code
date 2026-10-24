@@ -1,0 +1,14 @@
+[
+  {
+    "name": "week",
+    "title": "This week",
+    "subtitle": "Drilling Contractor for Claude Code: what needs attention, rendered by npm run view",
+    "sections": [
+      {
+        "title": "Needs attention",
+        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
+        "sql": "select 'replace me' as item, 'TODO(author)' as why"
+      }
+    ]
+  }
+]
