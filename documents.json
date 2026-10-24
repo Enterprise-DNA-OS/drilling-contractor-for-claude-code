@@ -1,11 +1,39 @@
 [
   {
-    "name": "example",
-    "title": "TODO(author): the first document this industry must produce",
-    "for_each": "select gen_random_uuid() as id, 'Example' as name",
-    "file": "name",
+    "name": "plod",
+    "title": "Daily drilling report (plod) for client sign-off",
+    "for_each": "select p.number as id, p.number || ' ' || r.code || ' ' || p.plod_date || ' ' || p.shift as label from plods p join rigs r on r.id = p.rig_id where p.status in ('submitted', 'rejected') order by p.plod_date, r.code, p.shift",
+    "file": "label",
     "sections": [
-      { "title": "Details", "sql": "select 'replace me' as item, $1::text as record_id" }
+      { "title": "Shift", "sql": "select p.number as plod, k.code as contract, k.name as programme, c.name as client, r.code as rig, r.make_model as rig_model, p.plod_date as date, p.shift, s.full_name as driller, p.engine_hours_end as engine_hours from plods p join contracts k on k.id = p.contract_id join clients c on c.id = k.client_id join rigs r on r.id = p.rig_id left join staff s on s.id = p.driller_id where p.number = $1" },
+      { "title": "Activities", "sql": "select a.line as no, a.activity, h.hole_id as hole, round(a.minutes / 60.0, 2) as hours, a.from_m, a.to_m, a.bit_serial as bit, a.notes from plod_activities a join plods p on p.id = a.plod_id left join holes h on h.id = a.hole_id where p.number = $1 order by a.line" },
+      { "title": "Crew", "sql": "select s.full_name as name, s.role, round(c.minutes / 60.0, 2) as hours from plod_crew c join plods p on p.id = c.plod_id join staff s on s.id = c.staff_id where p.number = $1 order by s.role, s.full_name" },
+      { "title": "Consumables", "sql": "select x.item, x.qty from plod_consumables x join plods p on p.id = x.plod_id where p.number = $1 order by x.item" },
+      { "title": "Charges at the contract rates", "sql": "select rate_code as code, description, unit, sum(qty) as qty, to_char(rate_cents / 100.0, 'FM$999,990.00') as rate, to_char(sum(amount_cents) / 100.0, 'FM$999,999,990.00') as amount from v_plod_charges where plod = $1 group by rate_code, description, unit, rate_cents order by rate_code" },
+      { "title": "Client sign-off", "note": "Signing confirms the times, metres and consumables above are correct for this shift.", "sql": "select '' as name, '' as position, '' as signature, '' as date where $1::text is not null" }
+    ]
+  },
+  {
+    "name": "claim",
+    "title": "Progress claim",
+    "for_each": "select cl.number as id, cl.number || ' ' || k.code as label from claims cl join contracts k on k.id = cl.contract_id order by cl.number",
+    "file": "label",
+    "sections": [
+      { "title": "Claim", "sql": "select cl.number as claim, k.name as programme, coalesce(k.external_ref, k.code) as contract_ref, c.name as client, c.abn as client_abn, k.tenement, cl.period_end as work_to, cl.submitted_on as claim_date, (coalesce(cl.submitted_on, cl.period_end) + k.terms_days) as payment_due_by from claims cl join contracts k on k.id = cl.contract_id join clients c on c.id = k.client_id where cl.number = $1" },
+      { "title": "Work claimed, at the schedule of rates", "sql": "select v.rate_code as code, v.description, v.unit, sum(v.qty) as qty, to_char(v.rate_cents / 100.0, 'FM$999,990.00') as rate, to_char(sum(v.amount_cents) / 100.0, 'FM$999,999,990.00') as amount from v_plod_charges v join claims cl on cl.id = v.claim_id where cl.number = $1 group by v.rate_code, v.description, v.unit, v.rate_cents order by v.rate_code" },
+      { "title": "Totals", "sql": "select to_char(cl.amount_cents / 100.0, 'FM$999,999,990.00') as amount_excl_gst, to_char(round(cl.amount_cents * 0.10) / 100.0, 'FM$999,999,990.00') as gst, to_char(round(cl.amount_cents * 1.10) / 100.0, 'FM$999,999,990.00') as total_incl_gst from claims cl where cl.number = $1" },
+      { "title": "Signed-off plods in this claim", "sql": "select p.number as plod, r.code as rig, p.plod_date as date, p.shift, p.approved_by as signed_off_by, p.approved_on from plods p join rigs r on r.id = p.rig_id join claims cl on cl.id = p.claim_id where cl.number = $1 order by p.plod_date, r.code, p.shift" }
+    ]
+  },
+  {
+    "name": "hole-summary",
+    "title": "Programme summary: holes drilled",
+    "for_each": "select k.code as id, k.code || ' ' || k.name as label from contracts k order by k.code",
+    "file": "label",
+    "sections": [
+      { "title": "Programme", "sql": "select k.code, k.name, c.name as client, k.tenement, k.pow_ref as programme_of_work, k.water_licence_ref as water_licence, k.starts_on, k.ends_on from contracts k join clients c on c.id = k.client_id where k.code = $1" },
+      { "title": "Holes", "sql": "select h.hole_id as hole, h.method, h.dip, h.azimuth, h.planned_depth as planned_m, h.depth_m as drilled_m, h.started_on, h.completed_on, h.rehab_on as capped_and_rehabilitated, h.stage from v_hole_status h where h.contract = $1 order by h.hole_id" },
+      { "title": "Metres by method", "sql": "select h.method, count(*) as holes, round(sum(h.depth_m), 1) as metres from v_hole_status h where h.contract = $1 group by h.method order by h.method" }
     ]
   }
 ]

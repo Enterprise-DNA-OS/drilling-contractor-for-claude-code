@@ -1,24 +1,27 @@
 # Why there is no front end
 
-CorePlan is a database with a subscription. The tables underneath it are ordinary: a few entities, a few relationships, a handful of workflows you repeat every week. What you pay for is the layer on top that lets people who do not write SQL get at those tables. Screens, filters, dashboards, forms.
+CorePlan is a database with a subscription. The records underneath it are ordinary: contracts, a schedule of rates, rigs, holes, crew, and the plod for every rig and shift. What you pay for is the layer on top: plod forms, approval screens, dashboards, and a charge calculator that multiplies metres by rates.
 
-That layer used to be the whole product, because talking to a database was hard. It is not hard any more. Open this folder in Claude Code, describe what you want, and it writes the query, runs it, and explains the answer. Ask a question the dashboard never had a chart for and you still get an answer.
+That layer used to be the whole product, because talking to a database was hard. It is not hard any more. Open this folder in Claude Code and ask "what can I claim from Kurrawang to the end of the month?" or "which driller gets the most metres per drilling hour on RC?" and it runs the query and gives you the answer. Ask something the dashboard never had a chart for and you still get an answer.
 
 ## What you gain
 
-- **Better answers.** A dashboard shows what the vendor decided to chart. Here you ask your own question, in your own words, and get it answered against your own data.
-- **No seats.** Everyone who needs to look can look. The bill does not grow with headcount.
-- **Your data in your Postgres.** Plain tables. Back them up, query them from anything, leave any time. There is no export step because there is nothing to leave.
-- **A process that matches you.** When your way of working changes, you add a command. You do not wait for a feature request to clear.
+- **Better answers.** A dashboard shows what the vendor decided to chart. Here you ask your own question, against your own plods, and get it answered.
+- **No per-rig or per-plod bill.** Add a rig, run a night shift, take on a second contract: the cost does not move.
+- **Your data in your Postgres.** Plain tables. Back them up, query them from anything, leave any time.
+- **Your rules.** Your fatigue limits, your rehab window, your client's sign-off days, your rate bands. Change them by asking.
 
-## What you give up
+## What a screen gives that this does not
 
-- **A visual board.** Stages are a table you ask about, not cards you drag.
-- **A phone app.** It runs where Claude Code runs.
-- **A vendor help desk.** This is open source. Enterprise DNA supports the installed version for businesses that want someone to call.
+Said honestly, so you can decide:
+
+- **An offline tablet app at the rig.** CorePlan's drillers fill the plod on a tablet with no signal. Here, the driller sends a photo of the paper plod or a spreadsheet at the end of the shift and the office enters it by asking Claude Code (`/enter-plod`). If your drillers need a form on a phone that works offline, Enterprise DNA builds one into your version.
+- **A client portal.** CorePlan lets the client's geologist sign off plods in a browser. Here the plod sheet is rendered as a document (`npm run docs -- plod`), sent by email, and the sign-off is recorded when it comes back. A sign-off page is a customisation.
+- **Live sensor feeds.** Measure-while-drilling data from rig sensors needs an integration. This version records what the plod records.
+- **A vendor help desk.** This is open source. Enterprise DNA supports the installed version for contractors that want someone to call.
 
 ## Who this fits
 
-Small teams who already use Claude Code, or who would rather learn to ask than learn another interface. If your team needs a screen to look at all day, keep CorePlan. If you need the answers more than the screens, this is cheaper, faster and yours.
+Drilling contractors and explorers with one to twenty rigs whose office already re-keys plods, builds the claim in a spreadsheet, and wants the answers more than the screens. If every driller needs a tablet app on day one, start with the customised version.
 
 Installed and run for you: https://enterprisedna.co/omni/instead-of/coreplan

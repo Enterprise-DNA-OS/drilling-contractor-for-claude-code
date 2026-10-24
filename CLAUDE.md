@@ -22,9 +22,33 @@ Fill this in once. A worker with context knows. A worker without it guesses.
 
 | When the operator asks for... | Use this |
 |---|---|
-| <!-- TODO(author): one row per slash command --> | `/...` |
+| What needs doing, what is wrong, what is late | `/attention` |
+| The Monday review | `/weekly-review` |
+| A quick picture of the business | `/stats` |
+| Contracts, one contract, its rates | `/contracts`, `/contract`, `/rates` |
+| A driller's plod to enter (photo, text, spreadsheet) | `/enter-plod` |
+| Plods for a period, or one plod | `/plods`, `/plod` |
+| What the client has not signed off | `/pending` |
+| The client signed off or rejected a plod | `/sign-off` |
+| What a contract has earned | `/charges` |
+| This month's claim | `/claim` |
+| Claims and who owes us | `/claims` |
+| Rigs, utilisation, prestarts, services | `/rigs`, `/utilisation`, `/prestart`, `/service` |
+| Holes and rehabilitation | `/holes` |
+| Crew hours and fatigue | `/crew-hours` |
+| Driller metres | `/drillers` |
+| Bits | `/bits` |
+| Incidents and notifications | `/incidents`, `/incident` |
+| Is everything in order with the rules | `/compliance` |
+| Plod sheets, claims, programme summaries | `/documents` |
+| Printable dashboards, or a new one | `/view`, `/new-view` |
+| Chase a sign-off, an overdue claim, a claim cover note | `/draft-signoff-chase`, `/draft-overdue-claim`, `/draft-claim-cover` |
+| Bring data across from CorePlan | `/import` |
+| Get the data out | `/export` |
+| A note on a contract | `/log` |
+| Change a field, a rule, a limit | `/customise` |
 
-If an ask fits nothing here, run the CLI directly (`npm run <cli> -- --help`) and then propose a new command for it.
+If an ask fits nothing here, run the CLI directly (`npm run drill -- help`) and then propose a new command for it.
 
 ## Hard rules
 
@@ -32,6 +56,10 @@ If an ask fits nothing here, run the CLI directly (`npm run <cli> -- --help`) an
 - Never delete records without an explicit yes in this session. Prefer marking closed or archived.
 - Never invent a record. If a name is ambiguous, list the candidates and ask.
 - The database is the source of truth. If the answer is not in it, say so.
+- Never guess a number off a plod photo. If a depth, time or quantity is unclear, ask.
+- A signed-off plod is the client's record. Change it only through `reopen`, which sends it back for sign-off.
+- Money is calculated from the contract's schedule of rates, never typed in. If a charge looks wrong, fix the rate or the plod.
+- Whether an incident is notifiable is a person's call. Say when it might be, and that the regulator is told immediately.
 
 ## Where things live
 

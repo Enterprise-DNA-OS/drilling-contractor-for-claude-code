@@ -6,14 +6,17 @@
   "license": "MIT",
   "author": "Enterprise DNA (https://www.enterprisedna.co)",
   "repository": "github:Enterprise-DNA-OS/drilling-contractor-for-claude-code",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "migrate": "node scripts/migrate.mjs",
     "seed": "node scripts/seed.mjs",
-    "demo": "node scripts/migrate.mjs && node scripts/seed.mjs",
+    "demo": "node scripts/demo.mjs",
     "view": "node scripts/view.mjs",
     "docs": "node scripts/docs.mjs",
-    "test": "node scripts/smoke.mjs"
+    "test": "node scripts/smoke.mjs",
+    "drill": "node scripts/drill.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

@@ -1,0 +1,8 @@
+Plod ID,Date,Shift,Rig,Project,Driller,Status,Hole ID,Drill Type,Activity,From (m),To (m),Hours,Bit Serial,Comments
+CP-4410,02/09/2026,Day,RC02,C-099,Craig Dunn,Approved,LLRC040,RC,Safety meeting,,,0.5,,
+CP-4410,02/09/2026,Day,RC02,C-099,Craig Dunn,Approved,LLRC040,RC,Drilling,0,118,9.5,B-RC-4401,
+CP-4410,02/09/2026,Day,RC02,C-099,Craig Dunn,Approved,LLRC040,RC,Standby - client,,,1.5,,Waiting on geologist
+CP-4410,02/09/2026,Day,RC02,C-099,Craig Dunn,Approved,,,Crib,,,0.5,,
+CP-4411,02/09/2026,Night,RC02,C-099,Craig Dunn,Pending Review,LLRC040,RC,Drilling,118,160,4,B-RC-4401,
+CP-4411,02/09/2026,Night,RC02,C-099,Craig Dunn,Pending Review,LLRC040,RC,Rig move,,,1,,To LLRC041
+CP-4411,02/09/2026,Night,RC02,C-099,Craig Dunn,Pending Review,,,Breakdown,,,3,,Compressor fault

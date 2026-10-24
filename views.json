@@ -1,13 +1,73 @@
 [
   {
     "name": "week",
-    "title": "This week",
-    "subtitle": "Drilling Contractor for Claude Code: what needs attention, rendered by npm run view",
+    "title": "This week on the rigs",
+    "subtitle": "Metres, sign-off and the shifts that went wrong",
     "sections": [
       {
-        "title": "Needs attention",
-        "note": "TODO(author): point this at the industry's attention view (overdue, stuck, quiet).",
-        "sql": "select 'replace me' as item, 'TODO(author)' as why"
+        "title": "Metres and hours by rig, last 7 days",
+        "sql": "select v.rig, v.contract, count(*) as shifts, round(sum(v.metres), 1) as metres, round(sum(v.drilling_min) / 60.0, 1) as drilling_h, round(sum(v.standby_client_min) / 60.0, 1) as client_standby_h, round(sum(v.lost_min) / 60.0, 1) as lost_h, to_char(sum(v.charge_cents) / 100.0, 'FM$999,999,990') as charges from v_plod_summary v where v.plod_date >= current_date - 7 and v.plod_date < current_date group by v.rig, v.contract order by v.rig"
+      },
+      {
+        "title": "Plods waiting on the client",
+        "note": "Nothing here can be claimed until it is signed off.",
+        "sql": "select v.number as plod, v.contract, v.rig, v.plod_date as date, v.shift, v.status, (current_date - v.submitted_on) as days_waiting, k.signoff_days as window_days, to_char(v.charge_cents / 100.0, 'FM$999,999,990') as charges, v.reject_reason from v_plod_summary v join contracts k on k.id = v.contract_id where v.status in ('submitted', 'rejected') order by v.status desc, v.submitted_on"
+      },
+      {
+        "title": "Working rigs with no plod",
+        "note": "Each day in the last 7 with no plod at all for a rig marked as working.",
+        "sql": "select r.code as rig, k.code as contract, g.d::date as day from rigs r join contracts k on k.id = r.contract_id cross join generate_series(current_date - 7, current_date - 1, interval '1 day') g(d) where r.status = 'working' and not exists (select 1 from plods p where p.rig_id = r.id and p.plod_date = g.d::date) order by r.code, day"
+      },
+      {
+        "title": "Holes in progress",
+        "sql": "select contract, hole_id as hole, method, planned_depth as planned_m, depth_m, started_on, last_plod_on from v_hole_status where stage = 'drilling' order by contract, hole_id"
+      }
+    ]
+  },
+  {
+    "name": "money",
+    "title": "Money",
+    "subtitle": "What is earned, what is claimed, what is owed",
+    "sections": [
+      {
+        "title": "By contract",
+        "sql": "select k.code as contract, c.name as client, to_char(coalesce(sum(v.charge_cents) filter (where v.claim_id is not null), 0) / 100.0, 'FM$999,999,990') as claimed, to_char(coalesce(sum(v.charge_cents) filter (where v.status = 'approved' and v.claim_id is null), 0) / 100.0, 'FM$999,999,990') as signed_off_unclaimed, to_char(coalesce(sum(v.charge_cents) filter (where v.status in ('submitted', 'rejected', 'draft')), 0) / 100.0, 'FM$999,999,990') as not_signed_off from contracts k join clients c on c.id = k.client_id left join v_plod_summary v on v.contract_id = k.id group by k.code, c.name order by k.code"
+      },
+      {
+        "title": "Open claims",
+        "sql": "select cl.number as claim, k.code as contract, cl.period_end as work_to, to_char(cl.amount_cents / 100.0, 'FM$999,999,990') as amount, cl.status, cl.submitted_on, (cl.submitted_on + k.terms_days) as due_on, greatest(current_date - (cl.submitted_on + k.terms_days), 0) as days_overdue from claims cl join contracts k on k.id = cl.contract_id where cl.status in ('draft', 'submitted', 'disputed') order by cl.period_end"
+      },
+      {
+        "title": "Client standby this month",
+        "note": "Billable time the client caused. Worth naming on the claim cover note.",
+        "sql": "select v.contract, v.rig, v.plod_date as date, v.shift, round(v.standby_client_min / 60.0, 1) as hours, (select string_agg(a.notes, '; ') from plod_activities a where a.plod_id = v.id and a.activity = 'standby-client') as why from v_plod_summary v where v.standby_client_min > 0 and v.plod_date >= date_trunc('month', current_date) order by v.plod_date"
+      }
+    ]
+  },
+  {
+    "name": "safety",
+    "title": "Safety and plant",
+    "subtitle": "Prestarts, services, crew records and incidents",
+    "sections": [
+      {
+        "title": "Shifts worked with no prestart",
+        "sql": "select r.code as rig, p.plod_date as date, p.shift, p.number as plod from plods p join rigs r on r.id = p.rig_id where p.plod_date >= current_date - 30 and not exists (select 1 from prestarts x where x.rig_id = p.rig_id and x.done_on = p.plod_date and x.shift = p.shift) order by p.plod_date"
+      },
+      {
+        "title": "Failed prestarts, last 14 days",
+        "sql": "select r.code as rig, x.done_on as date, x.shift, x.defects from prestarts x join rigs r on r.id = x.rig_id where not x.ok and x.done_on >= current_date - 14 order by x.done_on"
+      },
+      {
+        "title": "Services",
+        "sql": "select r.code as rig, (select max(engine_hours_end) from plods p where p.rig_id = r.id) as engine_hours, r.next_service_hours as service_due_at, round(r.next_service_hours - (select max(engine_hours_end) from plods p where p.rig_id = r.id), 1) as hours_left from rigs r where r.status <> 'sold' order by hours_left"
+      },
+      {
+        "title": "Licences and competency reviews due in 60 days or overdue",
+        "sql": "select code, full_name as name, role, licence_class, licence_expires_on, competency_expires_on from staff where active and (licence_expires_on < current_date + 60 or competency_expires_on < current_date + 60) order by least(coalesce(licence_expires_on, '9999-12-31'), coalesce(competency_expires_on, '9999-12-31'))"
+      },
+      {
+        "title": "Open incidents",
+        "sql": "select i.number, i.occurred_on, i.kind, r.code as rig, case when i.notifiable then 'yes' else '' end as notifiable, i.notified_on, i.description from incidents i left join rigs r on r.id = i.rig_id where i.closed_on is null order by i.occurred_on"
       }
     ]
   }

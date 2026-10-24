@@ -1,10 +1,10 @@
 {
   "_": "Your business on every document and view. Change these and run `npm run docs` or `npm run view`.",
-  "business_name": "Your Business",
+  "business_name": "Ironbark Drilling Pty Ltd",
   "logo_path": "",
-  "primary": "#6654f5",
-  "accent": "#ca5a8b",
-  "ink": "#0b0c18",
+  "primary": "#8a4b1f",
+  "accent": "#d99a3c",
+  "ink": "#1b1410",
   "paper": "#ffffff",
-  "footer_line": "Prepared with Drilling Contractor for Claude Code."
+  "footer_line": "Ironbark Drilling Pty Ltd, Kalgoorlie WA. Prepared with Drilling Contractor for Claude Code."
 }
